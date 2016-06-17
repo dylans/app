@@ -29,7 +29,7 @@ function isCustomElement(is: string): boolean {
 	return is === 'projection-surface' || is === 'attach-widget';
 }
 
-function getCustomElementsByProjectionSurface (root: Element): CustomElement[] {
+function getCustomElementsByProjectionSurface(root: Element): CustomElement[] {
 	const allElements: Element[] = Array.prototype.slice.call(root.getElementsByTagName('*'));
 	allElements.unshift(root); // Be inclusive!
 

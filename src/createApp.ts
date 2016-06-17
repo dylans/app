@@ -358,6 +358,7 @@ const createApp = compose({
 				// factory is registered through this method or loaded from a definition.
 				return factory(this._registry);
 			});
+			// Replace the registered factory to ensure next time this action is needed, the same action is returned.
 			registryHandle.destroy();
 			registryHandle = actions.get(this).register(id, () => promise);
 
@@ -386,6 +387,7 @@ const createApp = compose({
 				// factory is registered through this method or loaded from a definition.
 				return factory();
 			});
+			// Replace the registered factory to ensure next time this store is needed, the same store is returned.
 			registryHandle.destroy();
 			registryHandle = stores.get(this).register(id, () => promise);
 			return promise;
@@ -411,6 +413,7 @@ const createApp = compose({
 				// factory is registered through this method or loaded from a definition.
 				return factory();
 			});
+			// Replace the registered factory to ensure next time this widget is needed, the same widget is returned.
 			registryHandle.destroy();
 			registryHandle = widgets.get(this).register(id, () => promise);
 			return promise;
