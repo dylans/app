@@ -7,6 +7,7 @@ import {
 	ActionFactory,
 	ActionLike,
 	CombinedRegistry,
+	CustomElementDefinition,
 	ItemDefinition,
 	StoreDefinition,
 	StoreFactory,
@@ -82,9 +83,10 @@ function resolveStore(registry: CombinedRegistry, definition: ActionDefinition |
 
 type Factory = ActionFactory | StoreFactory | WidgetFactory;
 type Instance = ActionLike | StoreLike | WidgetLike;
-type FactoryTypes = 'action' | 'store' | 'widget';
+type FactoryTypes = 'action' | 'customElement' | 'store' | 'widget';
 const errorStrings: { [type: string]: string } = {
 	action: 'an action',
+	customElement: 'a widget',
 	store: 'a store',
 	widget: 'a widget'
 };
@@ -94,10 +96,14 @@ function isInstance(value: any): value is Instance {
 }
 
 function resolveFactory(type: 'action', definition: ActionDefinition, resolveMid: ResolveMid): Promise<ActionFactory>;
+function resolveFactory(type: 'customElement', definition: CustomElementDefinition, resolveMid: ResolveMid): Promise<WidgetFactory>;
 function resolveFactory(type: 'store', definition: StoreDefinition, resolveMid: ResolveMid): Promise<StoreFactory>;
 function resolveFactory(type: 'widget', definition: WidgetDefinition, resolveMid: ResolveMid): Promise<WidgetFactory>;
-function resolveFactory(type: FactoryTypes, definition: ItemDefinition<Factory, Instance>, resolveMid: ResolveMid): Promise<Factory>;
-function resolveFactory(type: FactoryTypes, { factory, instance }: ItemDefinition<Factory, Instance>, resolveMid: ResolveMid): Promise<Factory> {
+function resolveFactory(type: FactoryTypes, definition: CustomElementDefinition | ItemDefinition<Factory, Instance>, resolveMid: ResolveMid): Promise<Factory>;
+function resolveFactory(type: FactoryTypes, definition: CustomElementDefinition | ItemDefinition<Factory, Instance>, resolveMid: ResolveMid): Promise<Factory> {
+	const { factory } = definition;
+	const { instance = null } = (<ItemDefinition<Factory, Instance>> definition);
+
 	if (typeof factory === 'function') {
 		return Promise.resolve(factory);
 	}
@@ -159,6 +165,28 @@ export function makeActionFactory(definition: ActionDefinition, resolveMid: Reso
 			}
 
 			return action;
+		});
+	};
+}
+
+export function makeCustomElementFactory(definition: CustomElementDefinition, resolveMid: ResolveMid): WidgetFactory {
+	let promise: Promise<void>;
+	let factory: WidgetFactory;
+	return () => {
+		if (factory) {
+			return factory();
+		}
+
+		if (!promise) {
+			// Memoize the factory resolution.
+			promise = resolveFactory('customElement', definition, resolveMid).then((result) => {
+				factory = result;
+				promise = null;
+			});
+		}
+
+		return promise.then(() => {
+			return factory();
 		});
 	};
 }
