@@ -2609,7 +2609,7 @@ registerSuite({
 			},
 
 			'the rendered widget hierarchy reflects the nesting of custom elements'() {
-				app.registerCustomElementFactory('container-here', createContainer);
+				app.registerCustomElementFactory('container-here', () => createContainer());
 				app.registerWidget('foo', createActualWidget({ tagName: 'mark' }));
 				app.registerWidget('bar', createActualWidget({ tagName: 'strong' }));
 				root.innerHTML = `
@@ -2636,7 +2636,7 @@ registerSuite({
 			},
 
 			'the rendered widget hierarchy ignores non-custom elements'() {
-				app.registerCustomElementFactory('container-here', createContainer);
+				app.registerCustomElementFactory('container-here', () => createContainer());
 				app.registerWidget('foo', createActualWidget({ tagName: 'mark' }));
 				root.innerHTML = `
 					<projection-surface>
